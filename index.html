@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FieldOps — Dashboard</title>
+  <title>FieldOps — Operations</title>
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
@@ -498,6 +498,327 @@
         display: none;
       }
     }
+
+    /* Multi-page views */
+    .page {
+      display: none;
+    }
+
+    .page--active {
+      display: block;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .toolbar__search {
+      flex: 1;
+      min-width: 200px;
+      max-width: 360px;
+      position: relative;
+    }
+
+    .toolbar__search svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      stroke: var(--text-dim);
+      fill: none;
+      stroke-width: 2;
+      pointer-events: none;
+    }
+
+    .input,
+    .select {
+      font-family: inherit;
+      font-size: 0.875rem;
+      color: var(--text);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+
+    .toolbar__search .input {
+      padding-left: 38px;
+    }
+
+    .input:focus,
+    .select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .toolbar__filter {
+      min-width: 160px;
+    }
+
+    .toolbar__count {
+      font-size: 0.8125rem;
+      color: var(--text-dim);
+      margin-left: auto;
+    }
+
+    .badge--active {
+      background: rgba(52, 168, 83, 0.12);
+      color: var(--success);
+    }
+
+    .badge--active::before {
+      background: var(--success);
+    }
+
+    .badge--flagged {
+      background: rgba(234, 67, 53, 0.12);
+      color: #f28b82;
+    }
+
+    .badge--flagged::before {
+      background: var(--danger);
+    }
+
+    .badge--maintenance {
+      background: rgba(139, 145, 158, 0.15);
+      color: var(--text-muted);
+    }
+
+    .badge--maintenance::before {
+      background: var(--text-muted);
+    }
+
+    .risk {
+      font-size: 0.8125rem;
+      font-weight: 500;
+    }
+
+    .risk--low { color: var(--success); }
+    .risk--medium { color: var(--warning); }
+    .risk--high { color: #f28b82; }
+
+    .type-tag {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .empty-row td {
+      text-align: center;
+      color: var(--text-dim);
+      padding: 32px 22px;
+    }
+
+    /* Teams grid */
+    .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .team-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .team-card:hover {
+      border-color: rgba(4, 117, 124, 0.35);
+      box-shadow: 0 0 0 1px var(--accent-glow);
+    }
+
+    .team-card__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .team-card__name {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .team-card__lead {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .team-card__lead strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .team-card__stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .team-card__stat-label {
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .team-card__stat-value {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .badge--standby {
+      background: rgba(139, 145, 158, 0.15);
+      color: var(--text-muted);
+    }
+
+    .badge--standby::before {
+      background: var(--text-muted);
+    }
+
+    .badge--assignment {
+      background: rgba(249, 171, 0, 0.12);
+      color: var(--warning);
+    }
+
+    .badge--assignment::before {
+      background: var(--warning);
+    }
+
+    /* Reports list */
+    .reports-list {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .report-item {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background 0.15s;
+    }
+
+    .report-item:last-child {
+      border-bottom: none;
+    }
+
+    .report-item:hover {
+      background: rgba(4, 117, 124, 0.04);
+    }
+
+    .report-item__icon {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      border-radius: var(--radius-sm);
+      background: var(--accent-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .report-item__icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--accent);
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .report-item__body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .report-item__title {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .report-item__meta {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+    }
+
+    .report-item__meta span::before {
+      content: "·";
+      margin-right: 8px;
+      color: var(--text-dim);
+    }
+
+    .report-item__meta span:first-child::before {
+      content: none;
+      margin: 0;
+    }
+
+    .report-type {
+      display: inline-block;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--accent-muted);
+      color: #5ec4cb;
+      margin-right: 8px;
+    }
+
+    .btn--sm {
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 1024px) {
+      .teams-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .teams-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .report-item {
+        flex-wrap: wrap;
+      }
+
+      .toolbar__count {
+        width: 100%;
+        margin-left: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -513,10 +834,10 @@
         <span>Operations</span>
       </div>
       <nav class="topnav__nav" aria-label="Main">
-        <a href="#" class="topnav__link topnav__link--active">Dashboard</a>
-        <a href="#" class="topnav__link">Sites</a>
-        <a href="#" class="topnav__link">Teams</a>
-        <a href="#" class="topnav__link">Reports</a>
+        <a href="#dashboard" class="topnav__link topnav__link--active" data-page="dashboard">Dashboard</a>
+        <a href="#sites" class="topnav__link" data-page="sites">Sites</a>
+        <a href="#teams" class="topnav__link" data-page="teams">Teams</a>
+        <a href="#reports" class="topnav__link" data-page="reports">Reports</a>
       </nav>
     </div>
     <div class="topnav__right">
@@ -534,6 +855,7 @@
   </header>
 
   <main class="main">
+    <section id="page-dashboard" class="page page--active" data-page="dashboard" aria-label="Dashboard">
     <div class="page-header">
       <h1>Field Operations</h1>
       <p>Overview of active sites, teams, and survey activity across your network.</p>
@@ -668,6 +990,482 @@
         <a href="#">View all surveys →</a>
       </div>
     </section>
+    </section>
+
+    <section id="page-sites" class="page" data-page="sites" aria-label="Sites" hidden>
+      <div class="page-header">
+        <h1>Sites</h1>
+        <p>All registered field sites across regions — search and filter by operational status.</p>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar__search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" class="input" id="sites-search" placeholder="Search sites by name or region…" aria-label="Search sites">
+        </div>
+        <div class="toolbar__filter">
+          <select class="select" id="sites-status-filter" aria-label="Filter by status">
+            <option value="">All statuses</option>
+            <option value="Active">Active</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Pending Review">Pending Review</option>
+            <option value="Flagged">Flagged</option>
+            <option value="Maintenance">Maintenance</option>
+          </select>
+        </div>
+        <span class="toolbar__count" id="sites-count">8 sites</span>
+      </div>
+
+      <section class="panel">
+        <div class="table-wrap">
+          <table id="sites-table">
+            <thead>
+              <tr>
+                <th>Site Name</th>
+                <th>Region</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Last Inspection</th>
+                <th>Risk Level</th>
+              </tr>
+            </thead>
+            <tbody id="sites-tbody">
+              <tr data-name="Northgate Substation" data-region="Pacific Northwest" data-status="Active">
+                <td><div class="site-name">Northgate Substation</div><div class="site-id">SITE-2847</div></td>
+                <td class="location">Pacific Northwest</td>
+                <td class="type-tag">Substation</td>
+                <td><span class="badge badge--active">Active</span></td>
+                <td class="updated">Jun 4, 2026</td>
+                <td><span class="risk risk--low">Low</span></td>
+              </tr>
+              <tr data-name="Riverside Tower B" data-region="Southwest" data-status="In Progress">
+                <td><div class="site-name">Riverside Tower B</div><div class="site-id">SITE-1923</div></td>
+                <td class="location">Southwest</td>
+                <td class="type-tag">Commercial</td>
+                <td><span class="badge badge--progress">In Progress</span></td>
+                <td class="updated">Jun 4, 2026</td>
+                <td><span class="risk risk--medium">Medium</span></td>
+              </tr>
+              <tr data-name="Mesa Solar Array 4" data-region="Southwest" data-status="Pending Review">
+                <td><div class="site-name">Mesa Solar Array 4</div><div class="site-id">SITE-4102</div></td>
+                <td class="location">Southwest</td>
+                <td class="type-tag">Solar</td>
+                <td><span class="badge badge--pending">Pending Review</span></td>
+                <td class="updated">Jun 3, 2026</td>
+                <td><span class="risk risk--medium">Medium</span></td>
+              </tr>
+              <tr data-name="Harbor Logistics Hub" data-region="Pacific Northwest" data-status="Flagged">
+                <td><div class="site-name">Harbor Logistics Hub</div><div class="site-id">SITE-3389</div></td>
+                <td class="location">Pacific Northwest</td>
+                <td class="type-tag">Logistics</td>
+                <td><span class="badge badge--flagged">Flagged</span></td>
+                <td class="updated">Jun 3, 2026</td>
+                <td><span class="risk risk--high">High</span></td>
+              </tr>
+              <tr data-name="Cedar Creek Pipeline" data-region="Mountain" data-status="In Progress">
+                <td><div class="site-name">Cedar Creek Pipeline</div><div class="site-id">SITE-5510</div></td>
+                <td class="location">Mountain</td>
+                <td class="type-tag">Pipeline</td>
+                <td><span class="badge badge--progress">In Progress</span></td>
+                <td class="updated">Jun 2, 2026</td>
+                <td><span class="risk risk--low">Low</span></td>
+              </tr>
+              <tr data-name="Lakewood Wind Farm" data-region="Midwest" data-status="Active">
+                <td><div class="site-name">Lakewood Wind Farm</div><div class="site-id">SITE-6201</div></td>
+                <td class="location">Midwest</td>
+                <td class="type-tag">Wind</td>
+                <td><span class="badge badge--active">Active</span></td>
+                <td class="updated">Jun 1, 2026</td>
+                <td><span class="risk risk--low">Low</span></td>
+              </tr>
+              <tr data-name="Bayview Data Center" data-region="West Coast" data-status="Maintenance">
+                <td><div class="site-name">Bayview Data Center</div><div class="site-id">SITE-7744</div></td>
+                <td class="location">West Coast</td>
+                <td class="type-tag">Data Center</td>
+                <td><span class="badge badge--maintenance">Maintenance</span></td>
+                <td class="updated">May 30, 2026</td>
+                <td><span class="risk risk--medium">Medium</span></td>
+              </tr>
+              <tr data-name="East River Bridge" data-region="Northeast" data-status="Active">
+                <td><div class="site-name">East River Bridge</div><div class="site-id">SITE-8892</div></td>
+                <td class="location">Northeast</td>
+                <td class="type-tag">Infrastructure</td>
+                <td><span class="badge badge--active">Active</span></td>
+                <td class="updated">May 28, 2026</td>
+                <td><span class="risk risk--high">High</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <section id="page-teams" class="page" data-page="teams" aria-label="Teams" hidden>
+      <div class="page-header">
+        <h1>Teams</h1>
+        <p>Field crews currently deployed or on standby across the network.</p>
+      </div>
+
+      <div class="teams-grid">
+        <article class="team-card">
+          <div class="team-card__header">
+            <div>
+              <h2 class="team-card__name">Alpha Field Unit</h2>
+              <p class="team-card__lead">Lead: <strong>Morgan Chen</strong></p>
+            </div>
+            <span class="badge badge--active">Active</span>
+          </div>
+          <div class="team-card__stats">
+            <div>
+              <div class="team-card__stat-label">Members</div>
+              <div class="team-card__stat-value">8</div>
+            </div>
+            <div>
+              <div class="team-card__stat-label">Active Sites</div>
+              <div class="team-card__stat-value">12</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="team-card">
+          <div class="team-card__header">
+            <div>
+              <h2 class="team-card__name">Delta Survey Crew</h2>
+              <p class="team-card__lead">Lead: <strong>Sam Rivera</strong></p>
+            </div>
+            <span class="badge badge--active">Active</span>
+          </div>
+          <div class="team-card__stats">
+            <div>
+              <div class="team-card__stat-label">Members</div>
+              <div class="team-card__stat-value">6</div>
+            </div>
+            <div>
+              <div class="team-card__stat-label">Active Sites</div>
+              <div class="team-card__stat-value">9</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="team-card">
+          <div class="team-card__header">
+            <div>
+              <h2 class="team-card__name">Bravo Inspection</h2>
+              <p class="team-card__lead">Lead: <strong>Alex Kim</strong></p>
+            </div>
+            <span class="badge badge--assignment">On Assignment</span>
+          </div>
+          <div class="team-card__stats">
+            <div>
+              <div class="team-card__stat-label">Members</div>
+              <div class="team-card__stat-value">5</div>
+            </div>
+            <div>
+              <div class="team-card__stat-label">Active Sites</div>
+              <div class="team-card__stat-value">7</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="team-card">
+          <div class="team-card__header">
+            <div>
+              <h2 class="team-card__name">Charlie Ops</h2>
+              <p class="team-card__lead">Lead: <strong>Priya Patel</strong></p>
+            </div>
+            <span class="badge badge--active">Active</span>
+          </div>
+          <div class="team-card__stats">
+            <div>
+              <div class="team-card__stat-label">Members</div>
+              <div class="team-card__stat-value">7</div>
+            </div>
+            <div>
+              <div class="team-card__stat-label">Active Sites</div>
+              <div class="team-card__stat-value">11</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="team-card">
+          <div class="team-card__header">
+            <div>
+              <h2 class="team-card__name">Echo Field Team</h2>
+              <p class="team-card__lead">Lead: <strong>Chris Nolan</strong></p>
+            </div>
+            <span class="badge badge--standby">Standby</span>
+          </div>
+          <div class="team-card__stats">
+            <div>
+              <div class="team-card__stat-label">Members</div>
+              <div class="team-card__stat-value">4</div>
+            </div>
+            <div>
+              <div class="team-card__stat-label">Active Sites</div>
+              <div class="team-card__stat-value">6</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="team-card">
+          <div class="team-card__header">
+            <div>
+              <h2 class="team-card__name">Foxtrot Rapid Response</h2>
+              <p class="team-card__lead">Lead: <strong>Jamie Torres</strong></p>
+            </div>
+            <span class="badge badge--active">Active</span>
+          </div>
+          <div class="team-card__stats">
+            <div>
+              <div class="team-card__stat-label">Members</div>
+              <div class="team-card__stat-value">5</div>
+            </div>
+            <div>
+              <div class="team-card__stat-label">Active Sites</div>
+              <div class="team-card__stat-value">4</div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="page-reports" class="page" data-page="reports" aria-label="Reports" hidden>
+      <div class="page-header">
+        <h1>Reports</h1>
+        <p>Submitted inspection, safety, and compliance documents from the field.</p>
+      </div>
+
+      <div class="reports-list">
+        <article class="report-item">
+          <div class="report-item__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="report-item__body">
+            <div class="report-item__title"><span class="report-type">Inspection</span>Northgate Substation — Q2 Structural Review</div>
+            <div class="report-item__meta">
+              <span>Submitted by Morgan Chen</span>
+              <span>Jun 4, 2026</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn--ghost btn--sm">Download</button>
+        </article>
+
+        <article class="report-item">
+          <div class="report-item__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="report-item__body">
+            <div class="report-item__title"><span class="report-type">Safety</span>Riverside Tower B — Fall Protection Audit</div>
+            <div class="report-item__meta">
+              <span>Submitted by Sam Rivera</span>
+              <span>Jun 4, 2026</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn--ghost btn--sm">Download</button>
+        </article>
+
+        <article class="report-item">
+          <div class="report-item__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="report-item__body">
+            <div class="report-item__title"><span class="report-type">Environmental</span>Mesa Solar Array 4 — Vegetation Clearance</div>
+            <div class="report-item__meta">
+              <span>Submitted by Alex Kim</span>
+              <span>Jun 3, 2026</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn--ghost btn--sm">Download</button>
+        </article>
+
+        <article class="report-item">
+          <div class="report-item__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="report-item__body">
+            <div class="report-item__title"><span class="report-type">Incident</span>Harbor Logistics Hub — Loading Dock Incident</div>
+            <div class="report-item__meta">
+              <span>Submitted by Priya Patel</span>
+              <span>Jun 3, 2026</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn--ghost btn--sm">Download</button>
+        </article>
+
+        <article class="report-item">
+          <div class="report-item__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="report-item__body">
+            <div class="report-item__title"><span class="report-type">Inspection</span>Cedar Creek Pipeline — Corrosion Assessment</div>
+            <div class="report-item__meta">
+              <span>Submitted by Chris Nolan</span>
+              <span>Jun 2, 2026</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn--ghost btn--sm">Download</button>
+        </article>
+
+        <article class="report-item">
+          <div class="report-item__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="report-item__body">
+            <div class="report-item__title"><span class="report-type">Compliance</span>Lakewood Wind Farm — OSHA Walkthrough</div>
+            <div class="report-item__meta">
+              <span>Submitted by Jamie Torres</span>
+              <span>Jun 1, 2026</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn--ghost btn--sm">Download</button>
+        </article>
+
+        <article class="report-item">
+          <div class="report-item__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="report-item__body">
+            <div class="report-item__title"><span class="report-type">Inspection</span>Bayview Data Center — Cooling System Check</div>
+            <div class="report-item__meta">
+              <span>Submitted by Morgan Chen</span>
+              <span>May 30, 2026</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn--ghost btn--sm">Download</button>
+        </article>
+
+        <article class="report-item">
+          <div class="report-item__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="report-item__body">
+            <div class="report-item__title"><span class="report-type">Safety</span>East River Bridge — Load Capacity Verification</div>
+            <div class="report-item__meta">
+              <span>Submitted by Sam Rivera</span>
+              <span>May 28, 2026</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn--ghost btn--sm">Download</button>
+        </article>
+
+        <article class="report-item">
+          <div class="report-item__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="report-item__body">
+            <div class="report-item__title"><span class="report-type">Environmental</span>Harbor Logistics Hub — Stormwater Sampling</div>
+            <div class="report-item__meta">
+              <span>Submitted by Alex Kim</span>
+              <span>May 27, 2026</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn--ghost btn--sm">Download</button>
+        </article>
+
+        <article class="report-item">
+          <div class="report-item__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="report-item__body">
+            <div class="report-item__title"><span class="report-type">Compliance</span>Network-Wide — Q2 Equipment Inventory</div>
+            <div class="report-item__meta">
+              <span>Submitted by Priya Patel</span>
+              <span>May 25, 2026</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn--ghost btn--sm">Download</button>
+        </article>
+      </div>
+    </section>
   </main>
+
+  <script>
+    (function () {
+      var pages = document.querySelectorAll('.page');
+      var navLinks = document.querySelectorAll('.topnav__link[data-page]');
+      var pageTitles = {
+        dashboard: 'FieldOps — Dashboard',
+        sites: 'FieldOps — Sites',
+        teams: 'FieldOps — Teams',
+        reports: 'FieldOps — Reports'
+      };
+
+      function showPage(pageId) {
+        pages.forEach(function (page) {
+          var isActive = page.dataset.page === pageId;
+          page.classList.toggle('page--active', isActive);
+          page.hidden = !isActive;
+        });
+
+        navLinks.forEach(function (link) {
+          link.classList.toggle('topnav__link--active', link.dataset.page === pageId);
+        });
+
+        document.title = pageTitles[pageId] || 'FieldOps';
+        if (history.replaceState) {
+          history.replaceState(null, '', '#' + pageId);
+        }
+      }
+
+      navLinks.forEach(function (link) {
+        link.addEventListener('click', function (e) {
+          e.preventDefault();
+          showPage(link.dataset.page);
+        });
+      });
+
+      var hash = window.location.hash.slice(1);
+      if (hash && pageTitles[hash]) {
+        showPage(hash);
+      }
+
+      window.addEventListener('hashchange', function () {
+        var id = window.location.hash.slice(1);
+        if (pageTitles[id]) showPage(id);
+      });
+
+      var sitesSearch = document.getElementById('sites-search');
+      var sitesFilter = document.getElementById('sites-status-filter');
+      var sitesTbody = document.getElementById('sites-tbody');
+      var sitesCount = document.getElementById('sites-count');
+      var siteRows = sitesTbody ? Array.prototype.slice.call(sitesTbody.querySelectorAll('tr')) : [];
+
+      function filterSites() {
+        var query = (sitesSearch.value || '').trim().toLowerCase();
+        var status = sitesFilter.value;
+        var visible = 0;
+
+        siteRows.forEach(function (row) {
+          var name = (row.dataset.name || '').toLowerCase();
+          var region = (row.dataset.region || '').toLowerCase();
+          var rowStatus = row.dataset.status || '';
+          var matchesSearch = !query || name.indexOf(query) !== -1 || region.indexOf(query) !== -1;
+          var matchesStatus = !status || rowStatus === status;
+          var show = matchesSearch && matchesStatus;
+          row.style.display = show ? '' : 'none';
+          if (show) visible += 1;
+        });
+
+        sitesCount.textContent = visible === 1 ? '1 site' : visible + ' sites';
+
+        var empty = sitesTbody.querySelector('.empty-row');
+        if (visible === 0) {
+          if (!empty) {
+            empty = document.createElement('tr');
+            empty.className = 'empty-row';
+            empty.innerHTML = '<td colspan="6">No sites match your search or filter.</td>';
+            sitesTbody.appendChild(empty);
+          }
+        } else if (empty) {
+          empty.remove();
+        }
+      }
+
+      if (sitesSearch) {
+        sitesSearch.addEventListener('input', filterSites);
+        sitesFilter.addEventListener('change', filterSites);
+      }
+    })();
+  </script>
 </body>
 </html>
