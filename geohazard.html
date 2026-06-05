@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoHazard — Slope Stability</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0F1117;
+      --primary-dark: #003334;
+      --accent: #04757C;
+      --surface: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #FFFFFF;
+      --text-secondary: #8A9BA8;
+      --radius-card: 8px;
+      --radius-badge: 4px;
+      --badge-completed: #04757C;
+      --badge-in-progress: #F9AB00;
+      --badge-re-survey: #FF8C42;
+      --badge-rejected: #EA4335;
+      --badge-submitted: #5B8DEF;
+      --topnav-h: 65px;
+      --toolbar-w: 44px;
+      --panel-w: 360px;
+      --panel-top: 95px;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Map */
+    .map {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, var(--primary-dark) 0%, #002829 35%, var(--bg) 100%);
+      z-index: 0;
+    }
+
+    .map__grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(4, 117, 124, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(4, 117, 124, 0.06) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    .map__label {
+      position: absolute;
+      top: 50%;
+      left: 55%;
+      transform: translate(-50%, -50%);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(4, 117, 124, 0.35);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Top navigation */
+    .topnav {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: var(--toolbar-w);
+      height: var(--topnav-h);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      background: rgba(15, 17, 23, 0.92);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      z-index: 30;
+    }
+
+    .topnav__left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .topnav__logo {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-badge);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .topnav__logo svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--accent);
+    }
+
+    .topnav__brand {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .topnav__breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 20px;
+      padding-left: 20px;
+      border-left: 1px solid var(--border);
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    .topnav__breadcrumb svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--text-secondary);
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .topnav__breadcrumb strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .topnav__search-wrap {
+      flex: 1;
+      display: flex;
+      justify-content: flex-end;
+      padding: 0 24px;
+      max-width: 480px;
+      margin-left: auto;
+    }
+
+    .topnav__search {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .topnav__search svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      stroke: var(--text-secondary);
+      fill: none;
+      stroke-width: 2;
+      pointer-events: none;
+    }
+
+    .topnav__search input {
+      width: 100%;
+      height: 36px;
+      padding: 0 14px 0 38px;
+      font-family: inherit;
+      font-size: 0.8125rem;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-badge);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .topnav__search input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .topnav__search input:focus {
+      border-color: var(--accent);
+    }
+
+    .topnav__right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-badge);
+      background: var(--surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .icon-btn:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .icon-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .topnav__avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #035a60);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text);
+      border: 1px solid rgba(4, 117, 124, 0.5);
+      cursor: pointer;
+    }
+
+    /* Right toolbar */
+    .toolbar {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: var(--toolbar-w);
+      height: 100%;
+      background: rgba(15, 17, 23, 0.95);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      gap: 4px;
+      z-index: 40;
+    }
+
+    .toolbar__btn {
+      width: 34px;
+      height: 34px;
+      border: none;
+      border-radius: var(--radius-badge);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .toolbar__btn:hover {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .toolbar__btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .toolbar__btn[title]:hover::after {
+      content: attr(title);
+      position: absolute;
+      right: calc(100% + 10px);
+      top: 50%;
+      transform: translateY(-50%);
+      white-space: nowrap;
+      padding: 6px 10px;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--text);
+      background: #1A1D27;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-badge);
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .toolbar__divider {
+      width: 24px;
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    /* Map controls */
+    .map-controls {
+      position: absolute;
+      bottom: 24px;
+      right: calc(var(--toolbar-w) + 16px);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      z-index: 20;
+    }
+
+    .map-controls__btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border);
+      background: rgba(15, 17, 23, 0.9);
+      color: var(--text);
+      font-size: 1.125rem;
+      font-weight: 400;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .map-controls__btn:first-child {
+      border-radius: var(--radius-badge) var(--radius-badge) 0 0;
+    }
+
+    .map-controls__btn:last-child {
+      border-radius: 0 0 var(--radius-badge) var(--radius-badge);
+    }
+
+    .map-controls__btn:hover {
+      background: var(--surface);
+    }
+
+    .scale-bar {
+      position: absolute;
+      bottom: 24px;
+      left: calc(var(--panel-w) + 24px);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-start;
+    }
+
+    .scale-bar__line {
+      width: 80px;
+      height: 3px;
+      background: var(--text);
+      position: relative;
+    }
+
+    .scale-bar__line::before,
+    .scale-bar__line::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      width: 2px;
+      height: 8px;
+      background: var(--text);
+    }
+
+    .scale-bar__line::before { left: 0; }
+    .scale-bar__line::after { right: 0; }
+
+    .scale-bar__label {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.02em;
+    }
+
+    /* Left panel */
+    .panel {
+      position: absolute;
+      top: var(--panel-top);
+      left: 16px;
+      width: var(--panel-w);
+      bottom: 16px;
+      background: rgba(15, 17, 23, 0.94);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 25;
+    }
+
+    .panel__header {
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .panel__back-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .panel__back {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-badge);
+      background: var(--surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+      transition: color 0.15s;
+    }
+
+    .panel__back:hover {
+      color: var(--text);
+    }
+
+    .panel__back svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .panel__title {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+    }
+
+    .panel__subtitle {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .panel__body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px 16px;
+    }
+
+    .panel__body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .panel__body::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 3px;
+    }
+
+    /* Region card */
+    .region-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .region-card__name {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .region-card__meta {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .region-card__badge {
+      min-width: 36px;
+      height: 36px;
+      padding: 0 10px;
+      border-radius: var(--radius-badge);
+      background: rgba(4, 117, 124, 0.2);
+      border: 1px solid rgba(4, 117, 124, 0.4);
+      color: #5ec4cb;
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Status filters */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .filter-badge {
+      padding: 5px 10px;
+      font-family: inherit;
+      font-size: 0.625rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: var(--radius-badge);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .filter-badge:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .filter-badge--active {
+      background: rgba(4, 117, 124, 0.2);
+      border-color: var(--accent);
+      color: #5ec4cb;
+    }
+
+    .filter-badge--completed { color: var(--badge-completed); }
+    .filter-badge--in-progress { color: var(--badge-in-progress); }
+    .filter-badge--re-survey { color: var(--badge-re-survey); }
+    .filter-badge--submitted { color: var(--badge-submitted); }
+    .filter-badge--rejected { color: var(--badge-rejected); }
+
+    /* Panel search */
+    .panel-search {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .panel-search svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 15px;
+      height: 15px;
+      stroke: var(--text-secondary);
+      fill: none;
+      stroke-width: 2;
+      pointer-events: none;
+    }
+
+    .panel-search input {
+      width: 100%;
+      height: 38px;
+      padding: 0 14px 0 36px;
+      font-family: inherit;
+      font-size: 0.8125rem;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-badge);
+      outline: none;
+    }
+
+    .panel-search input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .panel-search input:focus {
+      border-color: var(--accent);
+    }
+
+    /* Section cards */
+    .section-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 14px 16px;
+      transition: border-color 0.15s;
+    }
+
+    .section-card:hover {
+      border-color: rgba(4, 117, 124, 0.35);
+    }
+
+    .section-card__top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .section-card__id {
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      font-size: 0.625rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      border-radius: var(--radius-badge);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .status-badge--completed {
+      background: rgba(4, 117, 124, 0.2);
+      color: #5ec4cb;
+      border: 1px solid rgba(4, 117, 124, 0.4);
+    }
+
+    .status-badge--in-progress {
+      background: rgba(249, 171, 0, 0.15);
+      color: var(--badge-in-progress);
+      border: 1px solid rgba(249, 171, 0, 0.35);
+    }
+
+    .status-badge--re-survey {
+      background: rgba(255, 140, 66, 0.15);
+      color: var(--badge-re-survey);
+      border: 1px solid rgba(255, 140, 66, 0.35);
+    }
+
+    .status-badge--rejected {
+      background: rgba(234, 67, 53, 0.15);
+      color: var(--badge-rejected);
+      border: 1px solid rgba(234, 67, 53, 0.35);
+    }
+
+    .status-badge--submitted {
+      background: rgba(91, 141, 239, 0.15);
+      color: var(--badge-submitted);
+      border: 1px solid rgba(91, 141, 239, 0.35);
+    }
+
+    .section-card__row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      margin-bottom: 6px;
+    }
+
+    .section-card__label {
+      color: var(--text-secondary);
+    }
+
+    .section-card__value {
+      font-weight: 500;
+      text-align: right;
+    }
+
+    .section-card__footer {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-details {
+      width: 100%;
+      height: 34px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-badge);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-details:hover {
+      background: rgba(4, 117, 124, 0.15);
+    }
+
+    @media (max-width: 768px) {
+      .topnav__breadcrumb,
+      .topnav__search-wrap {
+        display: none;
+      }
+
+      .panel {
+        width: calc(100% - 32px);
+        max-width: var(--panel-w);
+      }
+
+      .scale-bar {
+        left: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="map" aria-hidden="true">
+      <div class="map__grid"></div>
+      <span class="map__label">Map View</span>
+    </div>
+
+    <header class="topnav">
+      <div class="topnav__left">
+        <div class="topnav__logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/>
+          </svg>
+        </div>
+        <span class="topnav__brand">Geological Hazard</span>
+        <nav class="topnav__breadcrumb" aria-label="Breadcrumb">
+          <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          <strong>Slope Stability</strong>
+        </nav>
+      </div>
+
+      <div class="topnav__search-wrap">
+        <div class="topnav__search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" placeholder="Search map, layers, locations…" aria-label="Search">
+        </div>
+      </div>
+
+      <div class="topnav__right">
+        <button type="button" class="icon-btn" aria-label="Notifications">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <div class="topnav__avatar" title="User profile" role="img" aria-label="User A">A</div>
+      </div>
+    </header>
+
+    <aside class="toolbar" aria-label="Map tools">
+      <button type="button" class="toolbar__btn" title="TOC" aria-label="TOC">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </button>
+      <button type="button" class="toolbar__btn" title="Assign Road" aria-label="Assign Road">
+        <svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>
+      </button>
+      <button type="button" class="toolbar__btn" title="Assign Surveyor" aria-label="Assign Surveyor">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+      <button type="button" class="toolbar__btn" title="Measurement" aria-label="Measurement">
+        <svg viewBox="0 0 24 24"><path d="M2 12h5l2-7 4 14 2-7h7"/></svg>
+      </button>
+      <div class="toolbar__divider" aria-hidden="true"></div>
+      <button type="button" class="toolbar__btn" title="Bookmarks" aria-label="Bookmarks">
+        <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </button>
+      <button type="button" class="toolbar__btn" title="Go to Location" aria-label="Go to Location">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+      </button>
+      <button type="button" class="toolbar__btn" title="Identify" aria-label="Identify">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </button>
+      <button type="button" class="toolbar__btn" title="Nearby Analysis" aria-label="Nearby Analysis">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="6" stroke-dasharray="3 3"/></svg>
+      </button>
+      <div class="toolbar__divider" aria-hidden="true"></div>
+      <button type="button" class="toolbar__btn" title="Print" aria-label="Print">
+        <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      </button>
+    </aside>
+
+    <div class="scale-bar" aria-label="Map scale">
+      <div class="scale-bar__line"></div>
+      <span class="scale-bar__label">1000 m</span>
+    </div>
+
+    <div class="map-controls" aria-label="Zoom controls">
+      <button type="button" class="map-controls__btn" aria-label="Zoom in">+</button>
+      <button type="button" class="map-controls__btn" aria-label="Zoom out">−</button>
+    </div>
+
+    <aside class="panel" aria-label="Field Survey panel">
+      <div class="panel__header">
+        <div class="panel__back-row">
+          <button type="button" class="panel__back" aria-label="Go back">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div>
+            <h1 class="panel__title">Field Survey</h1>
+            <p class="panel__subtitle">Browse through multiple layers of road details</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel__body">
+        <div class="region-card">
+          <div>
+            <div class="region-card__name">Makkah</div>
+            <div class="region-card__meta">Total Stations: 4415</div>
+          </div>
+          <div class="region-card__badge">06</div>
+        </div>
+
+        <div class="filters" role="group" aria-label="Status filters">
+          <button type="button" class="filter-badge filter-badge--active">All</button>
+          <button type="button" class="filter-badge filter-badge--in-progress">In-Progress</button>
+          <button type="button" class="filter-badge filter-badge--completed">Completed</button>
+          <button type="button" class="filter-badge filter-badge--re-survey">Re-Survey</button>
+          <button type="button" class="filter-badge filter-badge--submitted">Submitted</button>
+          <button type="button" class="filter-badge filter-badge--rejected">Rejected</button>
+        </div>
+
+        <div class="panel-search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" placeholder="Search sections…" aria-label="Search sections">
+        </div>
+
+        <div class="section-list">
+          <article class="section-card">
+            <div class="section-card__top">
+              <h2 class="section-card__id">Section 4415_01</h2>
+              <span class="status-badge status-badge--completed">Completed</span>
+            </div>
+            <div class="section-card__row">
+              <span class="section-card__label">Surveyor</span>
+              <span class="section-card__value">Ez-Aldin Mohammed</span>
+            </div>
+            <div class="section-card__row">
+              <span class="section-card__label">Stations</span>
+              <span class="section-card__value">03</span>
+            </div>
+            <div class="section-card__footer">
+              <button type="button" class="btn-details">View Details</button>
+            </div>
+          </article>
+
+          <article class="section-card">
+            <div class="section-card__top">
+              <h2 class="section-card__id">Section 4415_2</h2>
+              <span class="status-badge status-badge--in-progress">In-Progress</span>
+            </div>
+            <div class="section-card__row">
+              <span class="section-card__label">Surveyor</span>
+              <span class="section-card__value">Ez-Aldin Mohammed</span>
+            </div>
+            <div class="section-card__row">
+              <span class="section-card__label">Stations</span>
+              <span class="section-card__value">03</span>
+            </div>
+            <div class="section-card__footer">
+              <button type="button" class="btn-details">View Details</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>
