@@ -247,25 +247,28 @@
     /* Right toolbar */
     .toolbar {
       position: absolute;
-      top: 0;
-      right: 0;
+      top: calc((100vh + var(--space-16) + var(--space-1)) / 2);
+      right: var(--space-4);
+      transform: translateY(-50%);
       width: calc(var(--space-10) + var(--space-1));
-      height: 100%;
+      height: auto;
       background: var(--color-surface-default);
-      border-left: 1px solid var(--color-border-default);
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-m);
+      box-shadow: var(--shadow-md);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: var(--space-3) 0;
-      gap: var(--space-1);
+      align-items: stretch;
+      padding: var(--space-1) 0;
       z-index: 40;
     }
 
     .toolbar__btn {
-      width: calc(var(--space-8) + var(--space-2));
+      width: 100%;
       height: calc(var(--space-8) + var(--space-2));
       border: none;
-      border-radius: var(--radius-xs);
+      border-bottom: 1px solid var(--color-border-default);
+      border-radius: 0;
       background: transparent;
       color: var(--color-icon-subtle);
       cursor: pointer;
@@ -276,8 +279,12 @@
       transition: background 0.15s, color 0.15s;
     }
 
+    .toolbar__btn:last-child {
+      border-bottom: none;
+    }
+
     .toolbar__btn:hover {
-      background: var(--color-surface-subtle);
+      background: var(--color-surface-raised);
       color: var(--color-icon-default);
     }
 
@@ -312,10 +319,7 @@
     }
 
     .toolbar__divider {
-      width: var(--space-6);
-      height: 1px;
-      background: var(--color-border-default);
-      margin: var(--space-2) 0;
+      display: none;
     }
 
     /* Map controls */
