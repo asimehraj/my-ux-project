@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FieldOps — Dashboard</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0F1117;
+      --bg-elevated: #161922;
+      --bg-card: #1A1D27;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.05);
+      --text: #E8EAED;
+      --text-muted: #8B919E;
+      --text-dim: #5C6370;
+      --accent: #04757C;
+      --accent-hover: #058a92;
+      --accent-muted: rgba(4, 117, 124, 0.15);
+      --accent-glow: rgba(4, 117, 124, 0.25);
+      --success: #34A853;
+      --warning: #F9AB00;
+      --danger: #EA4335;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top navigation */
+    .topnav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      height: 64px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topnav__brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topnav__logo {
+      width: 36px;
+      height: 36px;
+      background: var(--accent-muted);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .topnav__logo svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--accent);
+    }
+
+    .topnav__title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .topnav__title span {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 0.875rem;
+      margin-left: 8px;
+    }
+
+    .topnav__nav {
+      display: flex;
+      gap: 4px;
+      margin-left: 48px;
+    }
+
+    .topnav__link {
+      padding: 8px 14px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .topnav__link:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .topnav__link--active {
+      color: var(--accent);
+      background: var(--accent-muted);
+    }
+
+    .topnav__right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .topnav__icon-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .topnav__icon-btn:hover {
+      border-color: var(--border);
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .topnav__user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 4px 4px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--bg-card);
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .topnav__user:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .topnav__user-name {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .topnav__avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, #065f66 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.02em;
+    }
+
+    /* Main layout */
+    .main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    .page-header {
+      margin-bottom: 28px;
+    }
+
+    .page-header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+
+    .page-header p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* Stats row */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(4, 117, 124, 0.35);
+      box-shadow: 0 0 0 1px var(--accent-glow);
+    }
+
+    .stat-card__label {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-card__icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-card__icon svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--accent);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .stat-card__value {
+      font-size: 1.75rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+
+    .stat-card__delta {
+      font-size: 0.75rem;
+      margin-top: 8px;
+      color: var(--text-dim);
+    }
+
+    .stat-card__delta--up {
+      color: var(--success);
+    }
+
+    .stat-card__delta--warn {
+      color: var(--warning);
+    }
+
+    /* Table section */
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .panel__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel__title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+
+    .panel__subtitle {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .panel__actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+
+    .btn--ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .btn--ghost:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      color: var(--text);
+    }
+
+    .btn--primary {
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      color: #fff;
+    }
+
+    .btn--primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 12px 22px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover td {
+      background: rgba(4, 117, 124, 0.04);
+    }
+
+    .site-name {
+      font-weight: 500;
+    }
+
+    .site-id {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .location {
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .badge::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .badge--complete {
+      background: rgba(52, 168, 83, 0.12);
+      color: var(--success);
+    }
+
+    .badge--complete::before {
+      background: var(--success);
+    }
+
+    .badge--progress {
+      background: var(--accent-muted);
+      color: #5ec4cb;
+    }
+
+    .badge--progress::before {
+      background: var(--accent);
+    }
+
+    .badge--pending {
+      background: rgba(249, 171, 0, 0.12);
+      color: var(--warning);
+    }
+
+    .badge--pending::before {
+      background: var(--warning);
+    }
+
+    .badge--review {
+      background: rgba(234, 67, 53, 0.12);
+      color: #f28b82;
+    }
+
+    .badge--review::before {
+      background: var(--danger);
+    }
+
+    .team {
+      color: var(--text-muted);
+    }
+
+    .updated {
+      color: var(--text-dim);
+      font-size: 0.8125rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .panel__footer {
+      padding: 14px 22px;
+      border-top: 1px solid var(--border);
+      font-size: 0.8125rem;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel__footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .panel__footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 1024px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .topnav__nav {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topnav {
+        padding: 0 16px;
+      }
+
+      .main {
+        padding: 20px 16px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .topnav__user-name {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topnav">
+    <div class="topnav__brand">
+      <div class="topnav__logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.18l7.4 3.7L12 11.58 4.6 7.88 12 4.18zM4 8.82l8 4v8.36l-8-4V8.82zm16 0v8.36l-8 4v-8.36l8-4z"/>
+        </svg>
+      </div>
+      <div class="topnav__title">
+        FieldOps
+        <span>Operations</span>
+      </div>
+      <nav class="topnav__nav" aria-label="Main">
+        <a href="#" class="topnav__link topnav__link--active">Dashboard</a>
+        <a href="#" class="topnav__link">Sites</a>
+        <a href="#" class="topnav__link">Teams</a>
+        <a href="#" class="topnav__link">Reports</a>
+      </nav>
+    </div>
+    <div class="topnav__right">
+      <button type="button" class="topnav__icon-btn" aria-label="Notifications">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </button>
+      <div class="topnav__user">
+        <span class="topnav__user-name">Jordan Lee</span>
+        <div class="topnav__avatar" aria-hidden="true">JL</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="page-header">
+      <h1>Field Operations</h1>
+      <p>Overview of active sites, teams, and survey activity across your network.</p>
+    </div>
+
+    <section class="stats" aria-label="Summary statistics">
+      <article class="stat-card">
+        <div class="stat-card__label">
+          Active Sites
+          <span class="stat-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </span>
+        </div>
+        <div class="stat-card__value">47</div>
+        <div class="stat-card__delta stat-card__delta--up">+3 this week</div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-card__label">
+          Alerts
+          <span class="stat-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </span>
+        </div>
+        <div class="stat-card__value">12</div>
+        <div class="stat-card__delta stat-card__delta--warn">4 require action</div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-card__label">
+          Teams Deployed
+          <span class="stat-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+        </div>
+        <div class="stat-card__value">18</div>
+        <div class="stat-card__delta">Across 6 regions</div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-card__label">
+          Reports Pending
+          <span class="stat-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </span>
+        </div>
+        <div class="stat-card__value">9</div>
+        <div class="stat-card__delta">Due within 48h</div>
+      </article>
+    </section>
+
+    <section class="panel" aria-labelledby="surveys-heading">
+      <div class="panel__header">
+        <div>
+          <h2 class="panel__title" id="surveys-heading">Field Surveys</h2>
+          <p class="panel__subtitle">Recent site inspections and status updates</p>
+        </div>
+        <div class="panel__actions">
+          <button type="button" class="btn btn--ghost">Export</button>
+          <button type="button" class="btn btn--primary">New Survey</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Site Name</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Assigned Team</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="site-name">Northgate Substation</div>
+                <div class="site-id">SITE-2847</div>
+              </td>
+              <td class="location">Portland, OR</td>
+              <td><span class="badge badge--complete">Complete</span></td>
+              <td class="team">Alpha Field Unit</td>
+              <td class="updated">Jun 4, 2026 · 14:32</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="site-name">Riverside Tower B</div>
+                <div class="site-id">SITE-1923</div>
+              </td>
+              <td class="location">Austin, TX</td>
+              <td><span class="badge badge--progress">In Progress</span></td>
+              <td class="team">Delta Survey Crew</td>
+              <td class="updated">Jun 4, 2026 · 11:08</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="site-name">Mesa Solar Array 4</div>
+                <div class="site-id">SITE-4102</div>
+              </td>
+              <td class="location">Phoenix, AZ</td>
+              <td><span class="badge badge--pending">Pending Review</span></td>
+              <td class="team">Bravo Inspection</td>
+              <td class="updated">Jun 3, 2026 · 16:45</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="site-name">Harbor Logistics Hub</div>
+                <div class="site-id">SITE-3389</div>
+              </td>
+              <td class="location">Seattle, WA</td>
+              <td><span class="badge badge--review">Flagged</span></td>
+              <td class="team">Charlie Ops</td>
+              <td class="updated">Jun 3, 2026 · 09:21</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="site-name">Cedar Creek Pipeline</div>
+                <div class="site-id">SITE-5510</div>
+              </td>
+              <td class="location">Denver, CO</td>
+              <td><span class="badge badge--progress">In Progress</span></td>
+              <td class="team">Echo Field Team</td>
+              <td class="updated">Jun 2, 2026 · 18:57</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel__footer">
+        <span>Showing 5 of 47 surveys</span>
+        <a href="#">View all surveys →</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
