@@ -415,10 +415,12 @@
       top: calc(var(--space-16) + var(--space-6) + var(--space-4) + var(--space-1));
       left: var(--space-4);
       width: calc(var(--space-12) * 7 + var(--space-6));
-      bottom: var(--space-4);
+      bottom: auto;
+      max-height: calc(100vh - var(--space-16) - var(--space-6) - var(--space-4) - var(--space-1) - var(--space-4));
+      height: fit-content;
       background: var(--color-surface-default);
       border: 1px solid var(--color-border-default);
-      border-radius: var(--radius-s);
+      border-radius: var(--radius-m);
       box-shadow: var(--shadow-lg);
       display: flex;
       flex-direction: column;
@@ -427,63 +429,72 @@
     }
 
     .panel__header {
-      padding: var(--space-4) var(--space-4) var(--space-3);
-      border-bottom: 1px solid var(--color-border-default);
+      padding: var(--space-4) var(--space-4) 0;
       flex-shrink: 0;
     }
 
-    .panel__back-row {
-      display: flex;
-      align-items: flex-start;
+    .panel__header-bar {
+      display: grid;
+      grid-template-columns: var(--space-8) 1fr var(--space-8);
+      align-items: center;
       gap: var(--space-2);
     }
 
-    .panel__back {
+    .panel__back,
+    .panel__close {
       width: var(--space-8);
       height: var(--space-8);
       flex-shrink: 0;
-      border: 1px solid var(--color-border-default);
+      border: none;
       border-radius: var(--radius-xs);
-      background: var(--color-surface-raised);
-      color: var(--color-icon-subtle);
+      background: transparent;
+      color: var(--color-icon-default);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-top: var(--space-1);
-      transition: color 0.15s;
+      transition: color 0.15s, background 0.15s;
     }
 
-    .panel__back:hover {
-      color: var(--color-icon-default);
+    .panel__back:hover,
+    .panel__close:hover {
+      color: var(--color-text-primary);
+      background: var(--color-surface-raised);
     }
 
-    .panel__back svg {
-      width: var(--space-4);
-      height: var(--space-4);
+    .panel__back svg,
+    .panel__close svg {
+      width: var(--space-5);
+      height: var(--space-5);
       stroke: currentColor;
       fill: none;
       stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .panel__title {
       font-size: var(--font-size-body-md);
-      font-weight: var(--font-weight-semibold);
+      font-weight: var(--font-weight-bold);
       line-height: var(--line-height-body-md);
+      text-align: center;
       letter-spacing: -0.02em;
+      color: var(--color-text-primary);
     }
 
     .panel__subtitle {
       font-size: var(--font-size-label);
       line-height: var(--line-height-body-sm);
       color: var(--color-text-secondary);
-      margin-top: var(--space-1);
+      text-align: center;
+      margin-top: var(--space-2);
+      padding-bottom: var(--space-4);
     }
 
     .panel__body {
-      flex: 1;
+      flex: 0 1 auto;
       overflow-y: auto;
-      padding: var(--space-3) var(--space-4) var(--space-4);
+      padding: 0 var(--space-4) var(--space-4);
     }
 
     .panel__body::-webkit-scrollbar {
@@ -497,101 +508,143 @@
 
     /* Region card */
     .region-card {
-      background: var(--color-surface-raised);
-      border: 1px solid var(--color-border-default);
-      border-radius: var(--radius-s);
-      padding: var(--space-3) var(--space-4);
+      background: var(--color-surface-brand-subtle);
+      border: 1px solid color-mix(in srgb, var(--color-border-brand) 25%, transparent);
+      border-radius: var(--radius-m);
+      padding: var(--space-4);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: var(--space-3);
+      gap: var(--space-3);
+      margin-bottom: var(--space-4);
     }
 
-    .region-card__name {
-      font-size: var(--font-size-body-md);
-      font-weight: var(--font-weight-semibold);
-      line-height: var(--line-height-body-md);
+    .region-card__region {
+      font-size: var(--font-size-label);
+      line-height: var(--line-height-body-sm);
+      color: var(--color-text-tertiary);
       margin-bottom: var(--space-1);
     }
 
-    .region-card__meta {
-      font-size: var(--font-size-label);
-      line-height: var(--line-height-body-sm);
-      color: var(--color-text-secondary);
-    }
-
-    .region-card__badge {
-      min-width: calc(var(--space-8) + var(--space-1));
-      height: calc(var(--space-8) + var(--space-1));
-      padding: 0 var(--space-2);
-      border-radius: var(--radius-xs);
-      background: var(--color-surface-brand-subtle);
-      border: 1px solid color-mix(in srgb, var(--color-border-brand) 30%, transparent);
-      color: var(--color-text-brand);
+    .region-card__label {
       font-size: var(--font-size-body-sm);
       font-weight: var(--font-weight-semibold);
       line-height: var(--line-height-body-sm);
+      color: var(--color-text-brand);
+      margin-bottom: var(--space-1);
+    }
+
+    .region-card__value {
+      font-size: var(--font-size-body-lg);
+      font-weight: var(--font-weight-regular);
+      line-height: var(--line-height-body-lg);
+      color: var(--color-text-primary);
+    }
+
+    .region-card__badge {
+      min-width: var(--space-10);
+      height: var(--space-10);
+      padding: 0 var(--space-2);
+      border-radius: var(--radius-s);
+      background: var(--color-surface-default);
+      border: 1px solid var(--color-border-brand);
+      color: var(--color-text-brand);
+      font-size: var(--font-size-h5);
+      font-weight: var(--font-weight-bold);
+      line-height: var(--line-height-h5);
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
 
-    /* Status filters */
+    /* Status filters — capsules use --radius-xxl (32px) for all status badges */
     .filters {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: var(--space-2);
-      margin-bottom: var(--space-3);
+      margin-bottom: var(--space-4);
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-bottom: var(--space-1);
+    }
+
+    .filters::-webkit-scrollbar {
+      display: none;
     }
 
     .filter-badge {
-      padding: var(--space-1) var(--space-2);
+      flex-shrink: 0;
+      padding: var(--space-2) var(--space-4);
       font-family: inherit;
-      font-size: var(--font-size-badge);
-      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-label);
+      font-weight: var(--font-weight-medium);
       line-height: var(--line-height-body-sm);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      border-radius: var(--radius-xs);
+      border-radius: var(--radius-xxl);
       border: 1px solid var(--color-border-default);
-      background: transparent;
+      background: var(--color-surface-default);
       color: var(--color-text-secondary);
       cursor: pointer;
       transition: background 0.15s, color 0.15s, border-color 0.15s;
     }
 
     .filter-badge:hover {
-      color: var(--color-text-primary);
       border-color: var(--color-border-strong);
-      background: var(--color-surface-raised);
+      background: var(--color-surface-subtle);
     }
 
     .filter-badge--active {
-      background: var(--color-surface-brand-subtle);
-      border-color: var(--color-border-brand);
-      color: var(--color-text-brand);
+      background: var(--color-grey-800);
+      border-color: var(--color-grey-800);
+      color: var(--color-text-inverse);
     }
 
-    .filter-badge--completed { color: var(--color-status-success); }
-    .filter-badge--in-progress { color: var(--color-status-warning); }
-    .filter-badge--re-survey { color: var(--color-status-warning); }
-    .filter-badge--submitted { color: var(--color-status-info); }
-    .filter-badge--rejected { color: var(--color-status-error); }
+    .filter-badge--completed {
+      background: var(--color-surface-default);
+      border-color: var(--color-status-success);
+      color: var(--color-status-success);
+    }
+
+    .filter-badge--in-progress {
+      background: var(--color-surface-default);
+      border-color: var(--color-status-warning);
+      color: var(--color-status-warning);
+    }
+
+    .filter-badge--re-survey {
+      background: var(--color-surface-default);
+      border-color: var(--color-status-warning);
+      color: var(--color-status-warning);
+    }
+
+    .filter-badge--submitted {
+      background: var(--color-surface-default);
+      border-color: var(--color-status-info);
+      color: var(--color-status-info);
+    }
+
+    .filter-badge--rejected {
+      background: var(--color-surface-default);
+      border-color: var(--color-status-error);
+      color: var(--color-status-error);
+    }
 
     /* Panel search */
     .panel-search {
       position: relative;
-      margin-bottom: var(--space-3);
+      margin-bottom: var(--space-4);
     }
 
     .panel-search svg {
       position: absolute;
-      left: var(--space-3);
+      left: var(--space-4);
       top: 50%;
       transform: translateY(-50%);
-      width: var(--space-3);
-      height: var(--space-3);
-      stroke: var(--color-icon-subtle);
+      width: var(--space-4);
+      height: var(--space-4);
+      stroke: var(--color-icon-brand);
       fill: none;
       stroke-width: 2;
       pointer-events: none;
@@ -599,15 +652,15 @@
 
     .panel-search input {
       width: 100%;
-      height: calc(var(--space-8) + var(--space-2));
-      padding: 0 var(--space-3) 0 calc(var(--space-8) + var(--space-1));
+      height: calc(var(--space-10) + var(--space-1));
+      padding: 0 var(--space-4) 0 calc(var(--space-10) + var(--space-1));
       font-family: inherit;
       font-size: var(--font-size-body-sm);
       line-height: var(--line-height-body-sm);
       color: var(--color-text-primary);
-      background: var(--color-surface-raised);
+      background: var(--color-surface-default);
       border: 1px solid var(--color-border-default);
-      border-radius: var(--radius-xs);
+      border-radius: var(--radius-m);
       outline: none;
     }
 
@@ -623,27 +676,55 @@
     .section-list {
       display: flex;
       flex-direction: column;
-      gap: var(--space-2);
+      gap: var(--space-4);
     }
 
     .section-card {
-      background: var(--color-surface-raised);
+      background: var(--color-surface-default);
       border: 1px solid var(--color-border-default);
-      border-radius: var(--radius-s);
-      padding: var(--space-3) var(--space-4);
-      transition: border-color 0.15s;
+      border-radius: var(--radius-m);
+      padding: var(--space-4);
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
 
     .section-card:hover {
-      border-color: color-mix(in srgb, var(--color-border-brand) 35%, transparent);
+      border-color: var(--color-border-strong);
+      box-shadow: var(--shadow-sm);
     }
 
     .section-card__top {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: var(--space-2);
-      margin-bottom: var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+
+    .section-card__heading {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      min-width: 0;
+    }
+
+    .section-card__icon {
+      flex-shrink: 0;
+      width: var(--space-6);
+      height: var(--space-6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-icon-brand);
+    }
+
+    .section-card__icon svg {
+      width: var(--space-6);
+      height: var(--space-6);
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .section-card__id {
@@ -651,93 +732,107 @@
       font-weight: var(--font-weight-semibold);
       line-height: var(--line-height-body-sm);
       letter-spacing: -0.01em;
+      min-width: 0;
+    }
+
+    .section-card__id-label {
+      color: var(--color-text-brand);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .section-card__id-num {
+      color: var(--color-text-primary);
+      font-weight: var(--font-weight-semibold);
+      margin-left: var(--space-1);
     }
 
     .status-badge {
       display: inline-flex;
       align-items: center;
-      padding: var(--space-1) var(--space-2);
+      padding: var(--space-1) var(--space-3);
       font-size: var(--font-size-badge);
       font-weight: var(--font-weight-semibold);
       line-height: var(--line-height-body-sm);
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      border-radius: var(--radius-xs);
+      letter-spacing: 0.01em;
+      border-radius: var(--radius-xxl);
       white-space: nowrap;
       flex-shrink: 0;
     }
 
     .status-badge--completed {
-      background: var(--color-status-success-subtle);
+      background: var(--color-surface-default);
       color: var(--color-status-success);
-      border: 1px solid color-mix(in srgb, var(--color-status-success) 30%, transparent);
+      border: 1px solid var(--color-status-success);
     }
 
     .status-badge--in-progress {
-      background: var(--color-status-warning-subtle);
+      background: var(--color-surface-default);
       color: var(--color-status-warning);
-      border: 1px solid color-mix(in srgb, var(--color-status-warning) 35%, transparent);
+      border: 1px solid var(--color-status-warning);
     }
 
     .status-badge--re-survey {
-      background: var(--color-status-warning-subtle);
+      background: var(--color-surface-default);
       color: var(--color-status-warning);
-      border: 1px solid color-mix(in srgb, var(--color-status-warning) 35%, transparent);
+      border: 1px solid var(--color-status-warning);
     }
 
     .status-badge--rejected {
-      background: var(--color-status-error-subtle);
+      background: var(--color-surface-default);
       color: var(--color-status-error);
-      border: 1px solid color-mix(in srgb, var(--color-status-error) 35%, transparent);
+      border: 1px solid var(--color-status-error);
     }
 
     .status-badge--submitted {
-      background: var(--color-status-info-subtle);
+      background: var(--color-surface-default);
       color: var(--color-status-info);
-      border: 1px solid color-mix(in srgb, var(--color-status-info) 35%, transparent);
+      border: 1px solid var(--color-status-info);
     }
 
-    .section-card__row {
+    .section-card__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+
+    .section-card__field {
       display: flex;
-      justify-content: space-between;
-      font-size: var(--font-size-label);
-      line-height: var(--line-height-body-sm);
-      margin-bottom: var(--space-2);
+      flex-direction: column;
+      gap: var(--space-1);
     }
 
     .section-card__label {
-      color: var(--color-text-secondary);
+      font-size: var(--font-size-label);
+      line-height: var(--line-height-body-sm);
+      color: var(--color-text-tertiary);
     }
 
     .section-card__value {
-      font-weight: var(--font-weight-medium);
-      text-align: right;
-    }
-
-    .section-card__footer {
-      margin-top: var(--space-3);
-      padding-top: var(--space-3);
-      border-top: 1px solid var(--color-border-default);
+      font-size: var(--font-size-body-sm);
+      font-weight: var(--font-weight-semibold);
+      line-height: var(--line-height-body-sm);
+      color: var(--color-text-primary);
     }
 
     .btn-details {
       width: 100%;
-      height: calc(var(--space-8) + var(--space-2));
+      height: calc(var(--space-10) + var(--space-1));
       font-family: inherit;
-      font-size: var(--font-size-label);
+      font-size: var(--font-size-body-sm);
       font-weight: var(--font-weight-medium);
       line-height: var(--line-height-body-sm);
-      color: var(--color-text-brand);
-      background: transparent;
-      border: 1px solid var(--color-border-brand);
-      border-radius: var(--radius-xs);
+      color: var(--color-text-primary);
+      background: var(--color-surface-default);
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-s);
       cursor: pointer;
-      transition: background 0.15s, color 0.15s;
+      transition: background 0.15s, border-color 0.15s;
     }
 
     .btn-details:hover {
-      background: var(--color-surface-brand);
-      color: var(--color-text-inverse);
+      background: var(--color-surface-subtle);
+      border-color: var(--color-border-strong);
     }
 
     @media (max-width: calc(var(--space-12) * 16)) {
@@ -837,22 +932,24 @@
 
     <aside class="panel" aria-label="Field Survey panel">
       <div class="panel__header">
-        <div class="panel__back-row">
+        <div class="panel__header-bar">
           <button type="button" class="panel__back" aria-label="Go back">
             <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
-          <div>
-            <h1 class="panel__title">Field Survey</h1>
-            <p class="panel__subtitle">Browse through multiple layers of road details</p>
-          </div>
+          <h1 class="panel__title">Field Survey</h1>
+          <button type="button" class="panel__close" aria-label="Close panel">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
         </div>
+        <p class="panel__subtitle">Browse through multiple layers of road details</p>
       </div>
 
       <div class="panel__body">
         <div class="region-card">
-          <div>
-            <div class="region-card__name">Makkah</div>
-            <div class="region-card__meta">Total Stations: 4415</div>
+          <div class="region-card__content">
+            <div class="region-card__region">Makkah</div>
+            <div class="region-card__label">Total Stations</div>
+            <div class="region-card__value">4415</div>
           </div>
           <div class="region-card__badge">06</div>
         </div>
@@ -874,42 +971,71 @@
         <div class="section-list">
           <article class="section-card">
             <div class="section-card__top">
-              <h2 class="section-card__id">Section 4415_01</h2>
+              <div class="section-card__heading">
+                <span class="section-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M3 17l5-5 3 3 7-8"/><path d="M14 6h4v4"/><circle cx="6" cy="18" r="1.5" fill="currentColor" stroke="none"/><circle cx="18" cy="6" r="1.5" fill="currentColor" stroke="none"/></svg>
+                </span>
+                <h2 class="section-card__id">
+                  <span class="section-card__id-label">Section</span>
+                  <span class="section-card__id-num">4415_01</span>
+                </h2>
+              </div>
               <span class="status-badge status-badge--completed">Completed</span>
             </div>
-            <div class="section-card__row">
-              <span class="section-card__label">Surveyor</span>
-              <span class="section-card__value">Ez-Aldin Mohammed</span>
+            <div class="section-card__grid">
+              <div class="section-card__field">
+                <span class="section-card__label">Surveyor Name</span>
+                <span class="section-card__value">Ez-Aldin Mohammed</span>
+              </div>
+              <div class="section-card__field">
+                <span class="section-card__label">Stations</span>
+                <span class="section-card__value">03</span>
+              </div>
             </div>
-            <div class="section-card__row">
-              <span class="section-card__label">Stations</span>
-              <span class="section-card__value">03</span>
-            </div>
-            <div class="section-card__footer">
-              <button type="button" class="btn-details">View Details</button>
-            </div>
+            <button type="button" class="btn-details">View Details</button>
           </article>
 
           <article class="section-card">
             <div class="section-card__top">
-              <h2 class="section-card__id">Section 4415_2</h2>
+              <div class="section-card__heading">
+                <span class="section-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M3 17l5-5 3 3 7-8"/><path d="M14 6h4v4"/><circle cx="6" cy="18" r="1.5" fill="currentColor" stroke="none"/><circle cx="18" cy="6" r="1.5" fill="currentColor" stroke="none"/></svg>
+                </span>
+                <h2 class="section-card__id">
+                  <span class="section-card__id-label">Section</span>
+                  <span class="section-card__id-num">4415_2</span>
+                </h2>
+              </div>
               <span class="status-badge status-badge--in-progress">In-Progress</span>
             </div>
-            <div class="section-card__row">
-              <span class="section-card__label">Surveyor</span>
-              <span class="section-card__value">Ez-Aldin Mohammed</span>
+            <div class="section-card__grid">
+              <div class="section-card__field">
+                <span class="section-card__label">Surveyor Name</span>
+                <span class="section-card__value">Ez-Aldin Mohammed</span>
+              </div>
+              <div class="section-card__field">
+                <span class="section-card__label">Stations</span>
+                <span class="section-card__value">03</span>
+              </div>
             </div>
-            <div class="section-card__row">
-              <span class="section-card__label">Stations</span>
-              <span class="section-card__value">03</span>
-            </div>
-            <div class="section-card__footer">
-              <button type="button" class="btn-details">View Details</button>
-            </div>
+            <button type="button" class="btn-details">View Details</button>
           </article>
         </div>
       </div>
     </aside>
   </div>
+
+  <script>
+    (function () {
+      var filters = document.querySelector('.filters');
+      if (!filters) return;
+
+      filters.addEventListener('wheel', function (e) {
+        if (e.deltaY === 0) return;
+        e.preventDefault();
+        filters.scrollLeft += e.deltaY;
+      }, { passive: false });
+    })();
+  </script>
 </body>
 </html>
